@@ -4,8 +4,8 @@ A shell script that initializes a new project and sets up a Node.js environment 
 ## Usage
 1. Clone the repository or download the script file.
 2. In the terminal, navigate to the directory where the script file is located.
-3. Make the script file executable by running `chmod +x project-initializer.sh`.
-4. Run the script file by executing `./project-initializer.sh`.
+3. Make the script file executable by running `chmod +x project-init.sh.
+4. Run the script file by executing `./project-init.sh.
 5. The script will prompt you to enter the name of the project and choose a database (either MongoDB or PostgreSQL).
 6. The script will create a new directory for the project and set up the Node.js environment with the chosen database.
 7. The script will install necessary dependencies and set up a `server.js` file that starts an Express server on port 3000 (or the port specified in the `process.env.PORT` environment variable).
