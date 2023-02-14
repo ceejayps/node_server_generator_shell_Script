@@ -1,4 +1,5 @@
 #!/bin/sh
+clear
 
 # Prompt for the name of the project
 echo "What would you like to name your project? "
@@ -16,10 +17,11 @@ cd $project_name
 echo "Initializing the Node.js project..."
 
 # Initialize the Node.js project
+clear
 npm init -y
 
 mkdir -p src/{server/{database,models,routes,middleware},pages,views,assets,services}
-
+clear
 echo "Choose a database: "
 echo "1) MongoDB"
 echo "2) PostgreSQL"
@@ -27,7 +29,6 @@ read -p "Enter the number of your choice: " choice
 
 if [ $choice -eq 1 ]; then
   echo "Setting up MongoDB..."
-  npm install mongodb
   npm install mongoose
   cd src/server/database 
 
@@ -49,6 +50,35 @@ const db = async () => {
 export default db;" > connection.js
 
 cd ../../..
+
+# Prompt the user for the MongoDB connection information
+clear
+read -p "Enter the MongoDB host: " host
+clear
+read -p "Enter the MongoDB port: " port
+clear
+read -p "Enter the MongoDB username: " username
+clear
+read -p "Enter the MongoDB password: " password
+clear
+read -p "Enter the MongoDB database name: " dbname
+clear
+
+# Ask the user if the `+srv` option is enabled
+read -p "Is the +srv option enabled? (y/n) " srv
+
+# Build the MongoDB URI based on the user input
+if [ "$srv" = "y" ]; then
+  uri="mongodb+srv://$username:$password@$host/$dbname"
+else
+  uri="mongodb://$username:$password@$host:$port/$dbname"
+fi
+
+# Save the MongoDB URI as an environment variable in the .env file
+echo "LIVE_DATABASE_URL=$uri" >> .env
+
+echo "MongoDB URI saved to .env as LIVE_DATABASE_URL"
+
 
 elif [ $choice -eq 2 ]; then
   db="postgresql"
@@ -79,19 +109,25 @@ export default db;" > connection.js
   cd ../../..
 
 # Prompt the user for the DB host
+clear
 read -p "Enter DB host: " DB_HOST
+clear
 
 # Prompt the user for the DB port
 read -p "Enter DB port: " DB_PORT
+clear
 
 # Prompt the user for the DB username
 read -p "Enter DB username: " DB_USER
+clear
 
 # Prompt the user for the DB password
 read -p "Enter DB password: " DB_PASSWORD
+clear
 
 # Prompt the user for the DB name
 read -p "Enter DB name: " DB_NAME
+clear
 
 # Write the values to the .env file
 echo "DB_HOST=$DB_HOST" >> .env
@@ -109,7 +145,6 @@ else
 fi
 
 echo "You selected $db"
-
 
 echo "Installing dependencies..."
 
@@ -194,12 +229,11 @@ echo "node_modules
 
 " > .gitignore
 
-
+clear
 # Open the project in Visual Studio Code
 
-echo "Opening the project in Visual Studio Code..."
+echo "Project ready! Opening the project in Visual Studio Code..."
 
 # Open the project in Visual Studio Code
 code .
 
-echo "Project ready! Open in Visual Studio Code."
