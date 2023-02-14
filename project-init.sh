@@ -35,14 +35,14 @@ echo "import mongoose from 'mongoose';
 
 const db = async () => {
   try {
-––– const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL, {
-––––––useNewUrlParser: true,
-––––––useUnifiedTopology: true,
-––– });
-––– console.log(`MongoDB connected to ${connection.connection.host}`);
+    const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(`MongoDB connected to ${connection.connection.host}`);
   } catch (error) {
-––– console.log(error);
-––– process.exit(1);
+    console.log(error);
+    process.exit(1);
   }
 };
 
