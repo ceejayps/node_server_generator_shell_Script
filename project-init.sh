@@ -1,8 +1,5 @@
 #!/bin/sh
-mangocode="import { MongoClient } from 'mongodb';
-const uri = 'mongodb+srv://<username>:<password>@cluster.mongodb.net/test';
-  MongoClient.connect(uri, function(err, client) {
-  const collection = client.db('test').collection('devices'); client.close();}); "
+
 # Prompt for the name of the project
 echo -n "What would you like to name your project? "
 read project_name
@@ -10,6 +7,7 @@ read project_name
 echo "Creating a new directory for the project..."
 
 # Create a new directory for the project
+cd ..
 mkdir $project_name
 
 # Navigate to the new directory
@@ -20,20 +18,7 @@ echo "Initializing the Node.js project..."
 # Initialize the Node.js project
 npm init -y
 
-mkdir src
-cd src 
-mkdir server
-cd server
-mkdir database
-mkdir models
-mkdir routes
-mkdir middleware
-cd ..
-mkdir pages
-mkdir views
-mkdir assets
-mkdir services
-cd ..
+mkdir -p src/{server/{database,models,routes,middleware},pages,views,assets,services}
 
 echo "Choose a database: "
 echo "1) MongoDB"
@@ -41,7 +26,6 @@ echo "2) PostgreSQL"
 read -p "Enter the number of your choice: " choice
 
 if [ $choice -eq 1 ]; then
-  db=$mangocode
   echo "Setting up MongoDB..."
   npm install mongodb
   npm install mongoose
