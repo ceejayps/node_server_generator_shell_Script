@@ -20,22 +20,22 @@ A shell script that initializes a new project and sets up a Node.js environment 
 
 ## Project Structure 
     |
-    |-- src
+    |–– src
     |–––|
-    |–––|-- server
+    |–––|–– server
     |–––|–––|
-    |–––|–––|-- database
+    |–––|–––|–– database
     |–––|–––|–––|
-    |–––|–––|–––|-- connection.js
+    |–––|–––|–––|–– connection.js
     |–––|–––|
-    |–––|–––|-- models
-    |–––|–––|-- routes
-    |–––|–––|-- middleware
+    |–––|–––|–– models
+    |–––|–––|–– routes
+    |–––|–––|–– middleware
     |–––|
-    |–––|-- pages
-    |–––|-- views
-    |–––|-- assets
-    |–––|-- services
+    |–––|–– pages
+    |–––|–– views
+    |–––|–– assets
+    |–––|–– services
     |
-    |-- server.js
-    |-- package.json
+    |–– server.js
+    |–– package.json
