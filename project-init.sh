@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Prompt for the name of the project
-echo -n "What would you like to name your project? "
+echo "What would you like to name your project? "
 read project_name
 
 echo "Creating a new directory for the project..."
@@ -77,6 +77,32 @@ console.log('connected to PostgreSQL');
 export default db;" > connection.js
 
   cd ../../..
+
+# Prompt the user for the DB host
+read -p "Enter DB host: " DB_HOST
+
+# Prompt the user for the DB port
+read -p "Enter DB port: " DB_PORT
+
+# Prompt the user for the DB username
+read -p "Enter DB username: " DB_USER
+
+# Prompt the user for the DB password
+read -p "Enter DB password: " DB_PASSWORD
+
+# Prompt the user for the DB name
+read -p "Enter DB name: " DB_NAME
+
+# Write the values to the .env file
+echo "DB_HOST=$DB_HOST" >> .env
+echo "DB_PORT=$DB_PORT" >> .env
+echo "DB_USER=$DB_USER" >> .env
+echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+echo "DB_NAME=$DB_NAME" >> .env
+
+# Confirm the values have been saved
+echo "Saved DB credentials to .env file:"
+cat .env
 else
   echo "Invalid choice. Exiting."
   exit 1
