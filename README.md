@@ -17,3 +17,25 @@ A shell script that initializes a new project and sets up a Node.js environment 
 ## Notes
 - The MongoDB setup requires a valid connection URI. The script provides a sample URI that needs to be replaced with your own.
 - The PostgreSQL setup requires the following environment variables to be set: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME`.
+
+## Project Structure 
+    |
+    |-- src
+    |–––|
+    |–––|-- server
+    |–––|–––|
+    |–––|–––|-- database
+    |–––|–––|–––|
+    |–––|–––|–––|-- connection.js
+    |–––|–––|
+    |–––|–––|-- models
+    |–––|–––|-- routes
+    |–––|–––|-- middleware
+    |–––|
+    |–––|-- pages
+    |–––|-- views
+    |–––|-- assets
+    |–––|-- services
+    |
+    |-- server.js
+    |-- package.json
