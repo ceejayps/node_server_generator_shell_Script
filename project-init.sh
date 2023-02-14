@@ -1,6 +1,5 @@
 #!/bin/sh
 clear
-
 # Prompt for the name of the project
 echo "What would you like to name your project? "
 read project_name
@@ -36,14 +35,14 @@ echo "import mongoose from 'mongoose';
 
 const db = async () => {
   try {
-    const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB connected to ${connection.connection.host}`);
+––– const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL, {
+––––––useNewUrlParser: true,
+––––––useUnifiedTopology: true,
+––– });
+––– console.log(`MongoDB connected to ${connection.connection.host}`);
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+––– console.log(error);
+––– process.exit(1);
   }
 };
 
@@ -150,11 +149,13 @@ echo "Installing dependencies..."
 
 # Install dependencies
 npm install express morgan helmet cors body-parser dotenv jsonwebtoken bcrypt
+clear
 
 echo "Installing dev dependencies..."
 
 # Install dev dependencies
 npm install -D nodemon
+clear
 
 echo "Creating the server.js file..."
 
@@ -204,6 +205,7 @@ server.get('/', (req, res) => res.send('Hello World!'));
 server.listen(port, () => console.log('Example server listening on port ', port));
 
 " > server.js
+clear
 
 echo "Setting the 'dev' script and the type to 'module' in the package.json file..."
 
@@ -211,16 +213,19 @@ echo "Setting the 'dev' script and the type to 'module' in the package.json file
 # jq is required for this operation and can be installed with brew by running "brew install jq" in the terminal
 jq '.scripts.dev = "nodemon server.js" | .type = "module"' package.json > tmp.$$.json && mv tmp.$$.json package.json
 
+clear
 echo Creating a .env file
 
 # Create a .env file
 touch .env
 
+clear
 echo Initializing a Git repository
 
 # Initialize a Git repository
 git init
 
+clear
 echo Createing a .gitignore file
 
 # Create a .gitignore file
