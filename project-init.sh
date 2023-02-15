@@ -19,7 +19,7 @@ echo "Initializing the Node.js project..."
 clear
 npm init -y
 
-mkdir -p src/{server/{database/schemas,models,routes,middleware},pages,views,assets,services}
+mkdir -p src/{server/{database/schemas,controllers,routes,middleware},pages,views,assets,services}
 clear
 echo "Choose a database: "
 echo "1) MongoDB"
@@ -34,19 +34,22 @@ if [ $choice -eq 1 ]; then
 echo "import mongoose from 'mongoose';
 
 const db = async () => {
+  console.log(process.env.LIVE_DATABASE_URL)
   try {
-    const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB connected to ${connection.connection.host}`);
-  } catch (error) {
-    console.log(error);
-    process.exit(1);
-  }
+        const connection = await mongoose.connect(process.env.LIVE_DATABASE_URL,
+            {
+                useNewUrlParser:true,
+                useUnifiedTopology:true,
+            })
+            console.log(`mongoDB connected to ${connection.connection.host}`);
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
 };
 
-export default db;" > connection.js
+export default db;
+" > connection.js
 
 #create user schema
 
@@ -120,23 +123,22 @@ echo "Setting up Auth..."
 echo "
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from './userSchema.js';
-import { Role } from './roleSchema.js';
+import { User } from '../database/schemas/user.js';
+import { Role } from '../database/schemas/roles.js';
 
 // Register a new user
-async function registerUser(req, res) {
+const registerUser = async (req, res) => {
+  const { firstName, lastName, username, email, password } = req.body;
+
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({
-      \$or: [{ email: req.body.email }, { username: req.body.username }]
-    });
-    if (existingUser) {
-      return res.status(409).json({ message: 'User already exists' });
+    const user = await User.findOne({ \$or: [{ email }, { username }] });
+
+    if (user) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash the password using bcrypt
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Find the role with the name 'public' and assign it to the user
     const role = await Role.findOne({ name: 'public' });
@@ -144,25 +146,24 @@ async function registerUser(req, res) {
       return res.status(500).json({ message: 'Role not found' });
     }
 
-    // Create a new user and save it to the database
     const newUser = new User({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      username: req.body.username,
-      email: req.body.email,
+      firstName,
+      lastName,
+      username,
+      email,
       password: hashedPassword,
-      role: role._id // Assign the role's ID to the user
+      role: role,
     });
-    const savedUser = await newUser.save();
 
-    // Create a JWT token for the new user
-    const token = jwt.sign({ userId: savedUser._id }, 'mysecretkey');
+    await newUser.save();
 
-    res.status(201).json({ token });
+    res.status(201).json({ message: 'Registration successful', user: newUser });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
+
 
 const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
@@ -196,33 +197,56 @@ export { registerUser, loginUser };
 "> controllers/auth.js
 
 
+
+cd ../..
+
+# Set a random port number between 1001 and 9999
+port=$((RANDOM % 9000 + 1001))
+
+# Set a random 6-character string for the dbname
+dbname=$(echo $RANDOM | tr '[0-9]' '[a-z]' | head -c 6)
+
 # Prompt the user for the MongoDB connection information
 clear
 read -p "Enter the MongoDB host: " host
+if [ -z "$host" ]; then
+  host="localhost"
+fi
 clear
-read -p "Enter the MongoDB port: " port
+read -p "Enter the MongoDB port [$port]: " user_port
+if [ -n "$user_port" ]; then
+  port="$user_port"
+fi
 clear
 read -p "Enter the MongoDB username: " username
 clear
 read -p "Enter the MongoDB password: " password
 clear
-read -p "Enter the MongoDB database name: " dbname
-clear
+read -p "Enter the MongoDB database name [$dbname]: " user_dbname
+if [ -n "$user_dbname" ]; then
+  dbname="$user_dbname"
+fi
 
 # Ask the user if the `+srv` option is enabled
 read -p "Is the +srv option enabled? (y/n) " srv
-
 # Build the MongoDB URI based on the user input
 if [ "$srv" = "y" ]; then
   uri="mongodb+srv://$username:$password@$host/$dbname"
 else
-  uri="mongodb://$username:$password@$host:$port/$dbname"
+  # Check if username and password are empty
+  if [ -z "$username" ] || [ -z "$password" ]; then
+    uri="mongodb://$host:$port/$dbname"
+  else
+    uri="mongodb://$username:$password@$host:$port/$dbname"
+  fi
 fi
 
 # Save the MongoDB URI as an environment variable in the .env file
 echo "LIVE_DATABASE_URL=$uri" >> .env
 
 echo "MongoDB URI saved to .env as LIVE_DATABASE_URL"
+
+
 
 
 
@@ -290,6 +314,20 @@ else
   exit 1
 fi
 
+echo "import express from 'express';
+import { loginUser, registerUser } from '../controllers/auth.js';
+
+const authRouter = express.Router();
+
+// Register a new user
+authRouter.post('/register', registerUser);
+
+// Login an existing user
+authRouter.post('/login', loginUser);
+
+export { authRouter };
+" > src/server/routes/auth.js
+
 
 echo "Installing dependencies..."
 
@@ -317,13 +355,20 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import  path  from 'path';
+
+
+// Configuring environment variables
+dotenv.config({path:'server.env'});
+
+
 
 // Importing database connection file
 import db from './src/server/database/connection.js'
+db()
 
-// Importing schemas connection file
-import { User } from './src/server/database/schemas/user.js';
-import { Role } from './src/server/database/schemas/role.js';
+//import routers
+import { authRouter } from './src/server/routes/auth.js'
 
 // Initializing Express server
 const server = express();
@@ -331,8 +376,7 @@ const server = express();
 // Setting port
 const port = process.env.PORT ?? 3000;
 
-// Configuring environment variables
-dotenv.config();
+
 
 // Using security-related middlewares
 server.use(helmet());
@@ -347,6 +391,7 @@ server.use(morgan('dev'));
 
 // Using CORS
 server.use(cors());
+server.use('/api/v1', authRouter)
 
 // Route for root directory
 server.get('/', (req, res) => res.send('Hello World!'));
@@ -354,7 +399,8 @@ server.get('/', (req, res) => res.send('Hello World!'));
 // Starting the Express server
 server.listen(port, () => console.log('Example server listening on port ', port));
 
-" > server.js
+
+"> server.js
 clear
 
 echo "Setting the 'dev' script and the type to 'module' in the package.json file..."
@@ -364,10 +410,10 @@ echo "Setting the 'dev' script and the type to 'module' in the package.json file
 jq '.scripts.dev = "nodemon server.js" | .type = "module"' package.json > tmp.$$.json && mv tmp.$$.json package.json
 
 clear
-echo Creating a .env file
+echo Creating a server.env file
 
 # Create a .env file
-touch .env
+touch server.env
 
 clear
 echo Initializing a Git repository
