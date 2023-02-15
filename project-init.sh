@@ -19,7 +19,7 @@ echo "Initializing the Node.js project..."
 clear
 npm init -y
 
-mkdir -p src/{server/{database/schemas,controllers,routes,middleware},pages,views,assets,services}
+mkdir -p src/{server/{database/schemas,controllers,routes,middleware},components,pages,views,assets,services}
 clear
 echo "Choose a database: "
 echo "1) MongoDB"
@@ -332,13 +332,13 @@ export { authRouter };
 echo "Installing dependencies..."
 
 # Install dependencies
-npm install express morgan helmet cors body-parser dotenv jsonwebtoken bcrypt react react-dom babel @babel/register
+npm install express morgan helmet cors body-parser dotenv jsonwebtoken bcrypt react react-dom babel express-react-views
 clear
 
 echo "Installing dev dependencies..."
 
 # Install dev dependencies
-npm install -D nodemon
+npm install -D nodemon @babel/core @babel/preset-react @babel/register
 clear
 
 echo "Setting Up React..."
@@ -347,7 +347,7 @@ echo "Setting Up React..."
 echo "creating Index.jsx file..."
 echo "
 import React from 'react';
-import App from '../components/App';
+import App from './App';
 
 const Index = () => {
   return (
@@ -356,23 +356,23 @@ const Index = () => {
         <title>Hello, world!</title>
       </head>
       <body>
-        <div id="root">
+        <div id='root'>
           <App />
         </div>
-        <script src="/bundle.js"></script>
+        <script src='/bundle.js'></script>
       </body>
     </html>
   );
 };
 
 export default Index;
-"> src/views/index.jsx
+"> src/views/Index.jsx
 
 echo "creating App.jsx file..."
 
 echo "import React from 'react';
 
-const MyComponent = () => {
+const App = () => {
   return (
     <div>
       <h1>Hello, world!</h1>
@@ -381,7 +381,7 @@ const MyComponent = () => {
 };
 
 export default App;
-"> src/components/App.jsx
+"> src/views/App.jsx
 
 echo "Creating the server.js file..."
 
@@ -400,7 +400,12 @@ import bcrypt from 'bcrypt';
 import  path  from 'path';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import MyView from './views/my-view.jsx';
+import reactViews from 'express-react-views';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+//import App from './src/views/Index.jsx'
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
 // Configuring environment variables
@@ -440,21 +445,23 @@ server.use(cors());
 server.use('/api/v1', authRouter)
 
 //use react 
+
+server.set('views',path.join(__dirname, 'src/views'));
 server.set('view engine', 'jsx');
-server.engine('jsx', require('@babel/register')({
-  presets: ['@babel/preset-react']
-}));
+server.engine('jsx', reactViews.createEngine());
 
 
 
 // Route for root directory
 server.get('/', (req, res) => {
-  const html = ReactDOMServer.renderToString(<MyView />);
-  res.render('index', { html });
+  //const html = ReactDOMServer.renderToString(App );
+  res.render('index',{hello:'hello'});
 });
 
 // Starting the Express server
 server.listen(port, () => console.log('Example server listening on port ', port));
+
+
 
 
 "> server.js
