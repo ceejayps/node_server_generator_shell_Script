@@ -332,7 +332,7 @@ export { authRouter };
 echo "Installing dependencies..."
 
 # Install dependencies
-npm install express morgan helmet cors body-parser dotenv jsonwebtoken bcrypt
+npm install express morgan helmet cors body-parser dotenv jsonwebtoken bcrypt react react-dom babel @babel/register
 clear
 
 echo "Installing dev dependencies..."
@@ -340,6 +340,48 @@ echo "Installing dev dependencies..."
 # Install dev dependencies
 npm install -D nodemon
 clear
+
+echo "Setting Up React..."
+
+# set up react
+echo "creating Index.jsx file..."
+echo "
+import React from 'react';
+import App from '../components/App';
+
+const Index = () => {
+  return (
+    <html>
+      <head>
+        <title>Hello, world!</title>
+      </head>
+      <body>
+        <div id="root">
+          <App />
+        </div>
+        <script src="/bundle.js"></script>
+      </body>
+    </html>
+  );
+};
+
+export default Index;
+"> src/views/index.jsx
+
+echo "creating App.jsx file..."
+
+echo "import React from 'react';
+
+const MyComponent = () => {
+  return (
+    <div>
+      <h1>Hello, world!</h1>
+    </div>
+  );
+};
+
+export default App;
+"> src/components/App.jsx
 
 echo "Creating the server.js file..."
 
@@ -356,6 +398,9 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import  path  from 'path';
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import MyView from './views/my-view.jsx';
 
 
 // Configuring environment variables
@@ -377,6 +422,7 @@ const server = express();
 const port = process.env.PORT ?? 3000;
 
 
+server.use('/static', express.static('public'));
 
 // Using security-related middlewares
 server.use(helmet());
@@ -393,8 +439,19 @@ server.use(morgan('dev'));
 server.use(cors());
 server.use('/api/v1', authRouter)
 
+//use react 
+server.set('view engine', 'jsx');
+server.engine('jsx', require('@babel/register')({
+  presets: ['@babel/preset-react']
+}));
+
+
+
 // Route for root directory
-server.get('/', (req, res) => res.send('Hello World!'));
+server.get('/', (req, res) => {
+  const html = ReactDOMServer.renderToString(<MyView />);
+  res.render('index', { html });
+});
 
 // Starting the Express server
 server.listen(port, () => console.log('Example server listening on port ', port));
