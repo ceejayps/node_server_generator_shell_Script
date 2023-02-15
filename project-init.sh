@@ -201,7 +201,7 @@ export { registerUser, loginUser };
 cd ../..
 
 # Set a random port number between 1001 and 9999
-port=$((RANDOM % 9000 + 1001))
+port='' #/$((RANDOM % 9000 + 1001))
 
 # Set a random 6-character string for the dbname
 dbname=$(echo $RANDOM | tr '[0-9]' '[a-z]' | head -c 6)
@@ -215,7 +215,7 @@ fi
 clear
 read -p "Enter the MongoDB port [$port]: " user_port
 if [ -n "$user_port" ]; then
-  port="$user_port"
+  port=":$user_port"
 fi
 clear
 read -p "Enter the MongoDB username: " username
@@ -235,16 +235,16 @@ if [ "$srv" = "y" ]; then
 else
   # Check if username and password are empty
   if [ -z "$username" ] || [ -z "$password" ]; then
-    uri="mongodb://$host:$port/$dbname"
+    uri="mongodb://$host$port/$dbname"
   else
     uri="mongodb://$username:$password@$host:$port/$dbname"
   fi
 fi
 
-# Save the MongoDB URI as an environment variable in the .env file
-echo "LIVE_DATABASE_URL=$uri" >> .env
+# Save the MongoDB URI as an environment variable in the server.env file
+echo "LIVE_DATABASE_URL=$uri" >> server.env
 
-echo "MongoDB URI saved to .env as LIVE_DATABASE_URL"
+echo "MongoDB URI saved to server.env as LIVE_DATABASE_URL"
 
 
 
@@ -299,16 +299,16 @@ clear
 read -p "Enter DB name: " DB_NAME
 clear
 
-# Write the values to the .env file
-echo "DB_HOST=$DB_HOST" >> .env
-echo "DB_PORT=$DB_PORT" >> .env
-echo "DB_USER=$DB_USER" >> .env
-echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-echo "DB_NAME=$DB_NAME" >> .env
+# Write the values to the server.env file
+echo "DB_HOST=$DB_HOST" >> server.env
+echo "DB_PORT=$DB_PORT" >> server.env
+echo "DB_USER=$DB_USER" >> server.env
+echo "DB_PASSWORD=$DB_PASSWORD" >> server.env
+echo "DB_NAME=$DB_NAME" >> server.env
 
 # Confirm the values have been saved
-echo "Saved DB credentials to .env file:"
-cat .env
+echo "Saved DB credentials to server.env file:"
+cat server.env
 else
   echo "Invalid choice. Exiting."
   exit 1
@@ -412,7 +412,7 @@ jq '.scripts.dev = "nodemon server.js" | .type = "module"' package.json > tmp.$$
 clear
 echo Creating a server.env file
 
-# Create a .env file
+# Create a server.env file
 touch server.env
 
 clear
