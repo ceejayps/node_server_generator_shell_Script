@@ -19,7 +19,7 @@ echo "Initializing the Node.js project..."
 clear
 npm init -y
 
-mkdir -p src/{server/{database/schemas,controllers,routes,middleware},components,pages,views,assets,services}
+mkdir -p src/{server/{database/schemas,controllers,routes,middleware},views,assets,services}
 clear
 echo "Choose a database: "
 echo "1) MongoDB"
